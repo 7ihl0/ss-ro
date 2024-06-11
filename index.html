@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Cipher Converter</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            color: #34495e;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            box-sizing: border-box;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #3498db;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            background-color: #3498db;
+            color: #fff;
+            cursor: pointer;
+            margin: 10px;
+            transition: background-color 0.3s, transform 0.3s;
+            font-size: 1em;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #ecf0f1;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 1.1em;
+            transition: max-height 0.3s;
+        }
+
+        .copy-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background-color: #2ecc71;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            font-size: 1em;
+        }
+
+        .copy-button:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text Cipher Converter</h1>
+        <textarea id="text" rows="5" placeholder="Enter text..."></textarea>
+        <br>
+        <button onclick="convertToCipher()">Convert to Cipher</button>
+        <button onclick="convertToText()">Convert to Text</button>
+        <br><br>
+        <div id="result"></div>
+        <button class="copy-button" onclick="copyToClipboard()">Copy to Clipboard</button>
+    </div>
+
+    <script>
+        function getCiphers() {
+            return fetch('ciphers.json')
+                .then(response => response.json());
+        }
+
+        let cipher = {};
+
+        async function initializeCiphers() {
+            cipher = await getCiphers();
+        }
+
+        function convertToCipher() {
+            const text = document.getElementById("text").value.toLowerCase();
+            let result = "";
+            for (let char of text) {
+                if (cipher[char]) {
+                    result += cipher[char];
+                } else {
+                    result += "00000";
+                }
+            }
+            document.getElementById("result").textContent = result;
+        }
+
+        function convertToText() {
+            const cipherText = document.getElementById("text").value.trim().match(/.{1,5}/g);
+            let result = "";
+            for (let code of cipherText) {
+                let found = false;
+                for (let key in cipher) {
+                    if (cipher[key] === code) {
+                        result += key;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    result += "*";
+                }
+            }
+            document.getElementById("result").textContent = result;
+        }
+
+        function copyToClipboard() {
+            const result = document.getElementById("result").textContent;
+            navigator.clipboard.writeText(result).then(() => {
+                alert("Copied to clipboard!");
+            }, (err) => {
+                alert("Failed to copy: ", err);
+            });
+        }
+
+        initializeCiphers();
+    </script>
+</body>
+</html>
